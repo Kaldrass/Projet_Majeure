@@ -142,6 +142,33 @@ borders.sort()
 # cv2.circle(frame, (x2,y2), radius=2, color=(0, 255, 0), thickness=-1)
 # cv2.circle(frame, (x3,y3), radius=2, color=(0, 255, 0), thickness=-1)
 
+
+def projectionRectangle(I):
+    #On sélectionne les lignes verticales
+    seuil = 2
+    gy,gx = np.gradient(I)
+    G = np.sqrt(gx**2 + gy**2)
+    G_thr = 255*(G>seuil).astype(np.uint8)
+    lines = cv2.HoughLines(G_thr,2,np.pi/180,300)
+    #On sélectionne les lignes horizontales
+    seuil = 2
+    gx,gy = np.gradient(I)
+    G = np.sqrt(gx**2 + gy**2)
+    G_thr = 255*(G>seuil).astype(np.uint8)
+    lines2 = cv2.HoughLines(G_thr,2,np.pi/180,300)
+    
+    #On cherche les intersections entre les lignes
+    intersections = []
+    for line1 in lines:
+        for line2 in lines2:
+            intersections.append(intersectionBetweenLines(line1, line2))
+    #On récupère la plus petite intersection
+    intersections = np.array(intersections)
+    min_index = np.argmin(intersections[:,0])
+    
+    #On calcule les coordonnées des coins du rectangle
+    return [int(intersections[min_index,0]),int(intersections[min_index,1]),int(intersections[min_index,0]),int(intersections[min_index,1])]
+
 feuille = img[min(y0,y1,y2,y3):max(y0,y1,y2,y3),min(x0,x1,x2,x3):max(x0,x1,x2,x3)]
 plt.imshow(feuille)
 
