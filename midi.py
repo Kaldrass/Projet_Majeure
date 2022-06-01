@@ -9,7 +9,11 @@ Created on Wed Jun  1 16:28:59 2022
 import mido
 import time
 
-def ecriture_midi(tones):
+def ecriture_midi(tones,titre):
+    """
+    tones est le retour de la fonction de lecture de notres.py
+    titre doit se finie en .mid
+    """
     trans = {-0.5:43 , 0:41 , 0.5:40 , 1:38 , 1.5:36 , 2:35 , 2.5:33 , 3:31 , 3.5:29 , 4:28 , 4.5:26}
     #Ecriture du fichier MIDI
     mid = mido.MidiFile() #Création du fichier
@@ -52,10 +56,13 @@ def ecriture_midi(tones):
             track.append(mido.Message('note_off', note = note[i] + delta, velocity = 67, time = int(256 *rythme[i])))
      
      
-    mid.save('MIDO_Write-Nocturne-Composition-File.mid')  # enregistre le tout dans ce fichier Midi
+    mid.save(titre)  # enregistre le tout dans ce fichier Midi
     print("=> Fichier MIDI sauvegardé", mid, "...")  # affiche info fichier Midi
     
 def lecture_midi(titre):
+    """
+    titre doit se finir en .mid
+    """
     port1 = mido.get_output_names()
     port = mido.open_output(port1[0])
      
