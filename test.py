@@ -142,7 +142,6 @@ borders.sort()
 # cv2.circle(frame, (x2,y2), radius=2, color=(0, 255, 0), thickness=-1)
 # cv2.circle(frame, (x3,y3), radius=2, color=(0, 255, 0), thickness=-1)
 
-
 def projectionRectangle(I):
     #On sélectionne les lignes verticales
     seuil = 2
@@ -169,6 +168,7 @@ def projectionRectangle(I):
     #On calcule les coordonnées des coins du rectangle
     return [int(intersections[min_index,0]),int(intersections[min_index,1]),int(intersections[min_index,0]),int(intersections[min_index,1])]
 
+print(projectionRectangle(I))
 feuille = img[min(y0,y1,y2,y3):max(y0,y1,y2,y3),min(x0,x1,x2,x3):max(x0,x1,x2,x3)]
 plt.imshow(feuille)
 
