@@ -128,8 +128,28 @@ mid = MidiFile() #Création du fichier
 track = MidiTrack() 
 mid.tracks.append(track) 
  
+note = []
+coords = list(tones.keys())
+d = 20
+ref = 0
+L = []
+k = 0
+while k < len(coords):
+    print(coords[k],ref,abs(coords[k][0] - coords[ref][0]))
+    if abs(coords[k][0] - coords[ref][0]) < 6*d:
+        L.append((coords[k][::-1]))
+        k += 1
+    else:
+        ref = k
+        L.sort()
+        print(L)
+        for i in range(len(L)):
+            note.append(tones[L[i][::-1]])
+        L = []
 
-note = [trans[tones[k]] for k in range(len(tones))]
+for i in range(len(L)):
+    note.append(tones[L[i][::-1]])
+    
 rythme = [1.0 for k in range(len(notes))] #durée des notes (que noires pour le moment)
 hauteur = [0]  # choix des octaves à jouer, 12 = 1 octave et 0 = original
  
