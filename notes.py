@@ -8,6 +8,8 @@ Created on Tue May 31 15:24:21 2022
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
+from mido import Message, MidiFile, MidiTrack  
+import time    
 
 def line_evaluator(rho,theta,x):
     return rho/np.sin(theta) - x*np.cos(theta)/np.sin(theta)
@@ -65,8 +67,6 @@ for l in lines:
             y2 = int(y0 - s*(a))
             cv2.line(res,(x1,y1),(x2,y2),(255,0,0),1)
             
-plt.imshow(res)
-
 #Repérage des notes
 notes = np.argwhere(I_e == 255) #Listes des coordonnées des "notes"
 notes_traitees = [] #Liste des positions des notes
@@ -93,8 +93,6 @@ res_notes = img
 for b in notes_traitees:
     res_notes[b[0]-5:b[0]+5,b[1]-5:b[1]+5,0] = 255
     
-plt.imshow(res_notes)
-
 #Evaluation des notes
 tones = {}
 droites = sorted(zip(R,T))
@@ -124,3 +122,27 @@ for n in notes_traitees:
         
     tones[(y,x)] = h
     
+trans = {-0.5:43 , 0:41 , 0.5:40 , 1:38 , 1.5:36 , 2:35 , 2.5:33 , 3:31 , 3.5:29 , 4:28 , 4.5:26}
+#Ecriture du fichier MIDI
+mid = MidiFile() #Création du fichier
+track = MidiTrack() 
+mid.tracks.append(track) 
+ 
+
+note = [trans[tones[k]] for k in range(len(tones))]
+rythme = [1.0 for k in range(len(notes))] #durée des notes (que noires pour le moment)
+hauteur = [0]  # choix des octaves à jouer, 12 = 1 octave et 0 = original
+ 
+for h in hauteur:  # boucle octave à jouer par rapport aux notes d'origine
+    delta = h  # nb d'octaves à ajouter ou soustraire exprimé par tranche de 12 notes
+    print("   => HAUTEUR =", delta,"notes...")  # affiche nb notes en + ou - 
+    
+    for i in range(len(note)):  # boucle notes à jouer dans noctn (notes partition)
+        track.append(Message('program_change', program=64, time=0))  # n. program=instrument
+        track.append(Message('note_on', note = note[i] + delta, velocity = 100, time = 32))
+        print("Nocturne note #", note[i],"- Durée =", (rythme[i]), "- time =", int(256 *rythme[i]))
+        track.append(Message('note_off', notea = note[i] + delta, velocity = 67, time = int(256 *rythme[i])))
+ 
+ 
+mid.save('MIDO_Write-Nocturne-Composition-File.mid')  # enregistre le tout dans ce fichier Midi
+print("=> Fichier MIDI sauvegardé", mid, "...")  # affiche info fichier Midi
