@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import operator
 
 I = cv2.imread('ProjetMajeure\Images\im4.jpg')
 I = cv2.cvtColor(I,cv2.COLOR_RGB2GRAY)
@@ -46,10 +47,43 @@ sol = sol/255 # on binarise sol
 sol = sol.astype(np.uint8)
 
 sol = cv2.resize(sol,(3*sol.shape[1]//40,3*sol.shape[0]//40))
-sol = skeletonization(1-sol)
-sol = 1-sol
+# sol = skeletonization(1-sol)
+sol = 1 - sol
 
-plt.imshow(sol, 'gray')
-plt.show()
-plt.imshow(J, 'gray')
-plt.show()
+# On va comparer le nombre de pixels de la clef de sol en commun avec l'image
+# Pour ce faire, on regarde le premier quart de l'image pour réduire les calculs
+
+img = J[:J.shape[1],:J.shape[0]//4]
+img = img//255
+img = 1 - img
+img = img.astype(np.uint8)
+
+xsol = []
+ysol = []
+nbrsol = 0
+sustained = True
+remainingLoops = 0
+for i in range(img.shape[0]-sol.shape[0]):
+    for j in range(img.shape[1]-sol.shape[1]):
+        if(np.sum(img[i:i+sol.shape[0], j:j+sol.shape[1]]*sol) >= cv2.countNonZero(sol)*0.75) and sustained == True: # Si le nombre de pixels en commun est supérieur à 90%
+            nbrsol += 1
+            ysol.append(i)
+            xsol.append(j)
+            sustained = False
+            remainingLoops = sol.shape[0]
+            break
+    if(sustained == False):
+        remainingLoops -=1
+        if(remainingLoops == 0):
+            sustained = True
+
+print('Clefs de sol trouvees :',nbrsol)
+print('xsol :',xsol)
+print('ysol :',ysol)
+
+# plt.figure()
+# plt.subplot(2,3,1)
+# plt.imshow(img, 'gray')
+
+
+# plt.show()
